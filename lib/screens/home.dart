@@ -42,25 +42,74 @@ class _HomeScreenState extends State<HomeScreen> {
   String formattedDate = "";
   late String _now="";
   late Timer _everySecond;
-
   late List<Site> _sites;
   late bool _loading;
 
   late List<Site> _searchResult;
+  late List<Site> _tempList;
+  late List<Site> _searchList;
 
-  onSearchTextChanged(String text) async {
-    _searchResult.clear();
+  late List<Site> dogsBreedList;
+  late List<Site> tempList;
+  //bool isLoading = false;
+
+  onSearchTextChanged(String text) async{
+   // _searchResult.clear();
     if (text.isEmpty) {
-      setState(() {});
-      return;
+      setState(() {
+        _sites=tempList;
+      });
     }
-    _sites.forEach((userDetail) {
-      if (userDetail.title.contains(text))
-        _searchResult.add(userDetail);
-    });
-
-    setState(() {});
+    else {
+      final List<Site> filteredBreeds = <Site>[];
+      tempList.forEach((element) {
+        if (element.title.toLowerCase().toString().contains(text.toLowerCase().toString())) {
+          setState(() {
+            filteredBreeds.add(element);
+          });
+        }
+      });
+      setState(() {
+        _sites = filteredBreeds;
+      });
+    }
+    // _sites.forEach((userDetail) {
+    //   if (userDetail.title.contains(text))
+    //     _searchResult.add(userDetail);
+    // });
   }
+
+  _filterDogList(String text) {
+    if(text.isEmpty){
+      setState(() {
+        _sites = tempList;
+      });
+    }
+    else{
+      final List<Site> filteredBreeds = <Site>[];
+
+      // tempList.where((element){
+      //   if(element.title.toLowerCase().contains(text.toLowerCase())){
+      //     filteredBreeds.add(element);
+      //   }
+      // }).toList();
+
+      tempList.map((breed){
+        if(breed.title.toLowerCase().contains(text.toString().toLowerCase())){
+          filteredBreeds.add(breed);
+        }
+      }).toList();
+      //
+      setState(() {
+        _sites = filteredBreeds;
+      });
+    }
+  }
+
+
+
+
+
   @override
   void initState() {
     super.initState();
@@ -81,8 +130,9 @@ class _HomeScreenState extends State<HomeScreen> {
     String query = '';
 
     SiteServices.getUsers().then((sites) {
+      tempList = sites;
       setState(() {
-        _sites = sites;
+        _sites = tempList;
         _loading = false;
       });
 
@@ -96,17 +146,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return timeString;
   }
 
-
   @override
   Widget build(BuildContext context) {
-
 
    // double safe = MediaQuery.of(context).padding.top;
     DateTime now = DateTime.now();
     setState(() {
       //formattedDate = DateFormat('EEEE, d MMM  kk:mm  ').format(now);
       formattedDate = DateFormat('EEEE, d MMM  ').format(now);
-
     });
   //  double height1 = MediaQuery.of(context).size.height;
    // double width = MediaQuery.of(context).size.width;
@@ -130,7 +177,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 hintText: "Enter Bet Name",
             icon: Icon(Icons.search),
             ),
-            onChanged: onSearchTextChanged,
+            onChanged: (text){
+              _filterDogList(text);
+            }
           ),
           iconTheme: IconThemeData(color: Colors.black),
           toolbarHeight: barheight,
@@ -147,10 +196,8 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
               setState(() {
                 isSearching==false?isSearching=true:isSearching=false;
-
               });
                // focusNode.requestFocus();
-
               },
             )
                 :
@@ -163,9 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 setState(() {
                   isSearching==false?isSearching=true:isSearching=false;
-
                 });
-
                 //  focusNode.requestFocus();
               },
             )
@@ -183,59 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: width,
                       height: height*.30,
                       child: Image.asset("graphic_res/Asset 1.png",scale: 2,),
-                      // child:
-                      // Stack(
-                      //     children:[
-                      //       CustomPaint(
-                      //           painter: BluePainter(),
-                      //           child: Container()
-                      //       ),
-                      //       Container(
-                      //         padding: EdgeInsets.symmetric(horizontal: 20),
-                      //         width: width,
-                      //         height: height*.2933,
-                      //         child: Row(
-                      //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      //           crossAxisAlignment: CrossAxisAlignment.center,
-                      //           children: [
-                      //             Container(
-                      //               alignment: Alignment.center,
-                      //               height: height*0.08,
-                      //               width: height*0.08,
-                      //               // color: Colors.yellowAccent,
-                      //               decoration: BoxDecoration(
-                      //                   color: Color(0xfff2f1ad),
-                      //                   shape: BoxShape.circle,
-                      //                   border: Border.all(
-                      //                     color: Colors.white,
-                      //                     width: 5,
-                      //                   )
-                      //               ),
-                      //               child: Text("A",style: TextStyle(color: Colors.white,fontSize: 24),),
-                      //
-                      //             ),
-                      //             Container(
-                      //                 padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
-                      //                 width: width*0.33,
-                      //                 child: Text("Abi@abhi.sighn",style: TextStyle(color: Colors.white,fontSize: 20),textAlign: TextAlign.start,)),
-                      //             InkWell(
-                      //                 onTap: (){
-                      //                   Navigator.push(context, MaterialPageRoute(
-                      //                       builder: (context) => ScanQrCodeScreen())
-                      //                   );
-                      //                 },
-                      //                 child: Icon(FontAwesomeIcons.sun,color: Colors.white,)),
-                      //             Container(
-                      //               width: width*.08,
-                      //             )
-                      //
-                      //
-                      //           ],
-                      //         ),
-                      //       )
-                      //
-                      //     ]
-                      // ),
+
                     ),
                     Container(
                       width: width,
@@ -381,7 +374,6 @@ class _HomeScreenState extends State<HomeScreen> {
             // ),
           ),
         ),
-
           body: Column(
           children: [
             Container(
@@ -452,185 +444,193 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
 
                   ),
-
-
-
+                  
                   Container(
                    // color: Colors.pink,
                     height: height*0.7,
                     child:
-                    _searchResult.length!=0 || controller.text.isNotEmpty
-                      ?
-                    ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _searchResult.length,
-                        itemBuilder: (context,index){
-                          Site site = _searchResult[index];
-                          index == 0 ? rating = 0 : rating = double.parse(site.ratings);
-                          //     rating = double.parse(site.ratings);
-                          return Container(
-                            padding: EdgeInsets.all(10),
-                            child: index == 0 ? Container() : Container(
-                              height: height*.5,
-                              width: width*.82,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.all(Radius.circular(20)),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  // Image.network(site.bgImage,height: height*.48*.51,),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-                                    child: Image.network(
-                                      site.bgImage,
-                                      fit: BoxFit.cover,
-                                      height: height*.48*.51,
-                                      loadingBuilder: (BuildContext context, Widget child,
-                                          ImageChunkEvent? loadingProgress) {
-                                        if (loadingProgress == null) return child;
-                                        return Center(
-                                          child: CircularProgressIndicator(
-                                            value: loadingProgress.expectedTotalBytes != null
-                                                ? loadingProgress.cumulativeBytesLoaded /
-                                                loadingProgress.expectedTotalBytes!
-                                                : null,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-
-
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 20),
-                                    height: height*.5*.15,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Container(
-                                            width: width*0.5,
-                                            child: Text(site.title,style: TextStyle(fontSize: 18,fontWeight: FontWeight.w600),)),
-                                        //  Image.asset("graphic_res/design_3_assets/3/xbet.png"),
-                                        // Image.network(site.logo,width: width*0.20,
-                                        //      fit: BoxFit.cover),
-
-                                        Image.network(
-                                          site.logo,
-                                          fit: BoxFit.cover,
-                                          width: width*0.20,
-                                          height: height*.48*.10,
-
-                                          loadingBuilder: (BuildContext context, Widget child,
-                                              ImageChunkEvent? loadingProgress) {
-                                            if (loadingProgress == null) return child;
-                                            return Center(
-                                              child: CircularProgressIndicator(
-                                                value: loadingProgress.expectedTotalBytes != null
-                                                    ? loadingProgress.cumulativeBytesLoaded /
-                                                    loadingProgress.expectedTotalBytes!
-                                                    : null,
-                                              ),
-                                            );
-                                          },
-                                        ),
-
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 20),
-                                    height: height*.5*.27,
-                                    child:
-                                    Text(site.shortDescription)
-                                    // Text("At the game? Just got a gut feeling?"
-                                    //     "No problem! Now you can bet from anywhere,"
-                                    //     "anytime with the all-new Xbet mobile betting")
-                                    ,
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 20),
-                                    height: height*.48*.097,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            Container(
-                                              alignment: Alignment.centerLeft,
-                                              color: Colors.white,
-                                              height: height*.05,
-                                              child: StarRating02(
-                                                size: 18,
-                                                rating: rating,
-                                                onRatingChanged: (rating) => setState(() {}),
-                                                color: Colors.transparent,
-                                              ),
-                                            ),
-                                            SizedBox(width: 5,),
-                                            Text(rating.toString(), style: TextStyle(fontSize: 16 , color: Colors.grey),),
-                                          ],
-                                        ),
-                                        Container(
-                                          alignment: Alignment.centerRight,
-                                          child: Container(
-                                              width: width*0.3,
-                                              decoration: BoxDecoration(
-                                                color: Color(0xff57bbb4),
-                                                borderRadius: BorderRadius.all(Radius.circular(10)),
-                                              ),
-                                              alignment: Alignment.center,
-                                              child:  TextButton(
-                                                onPressed: (){
-                                                  Navigator.push(context, MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          BetDescriptionScreen(
-                                                              site.id,
-                                                              site.title,
-                                                              site.url,
-                                                              site.promocode,
-                                                              site.ratings,
-                                                              site.feature1,
-                                                              site.feature2,
-                                                              site.feature3,
-                                                              site.feature4,
-                                                              site.logo,
-                                                              site.addedDate,
-                                                              site.feature5,
-                                                              site.feature6,
-                                                              site.cons1,
-                                                              site.cons2,
-                                                              site.cons3,
-                                                              site.cons4,
-                                                              site.cons5,
-                                                              site.cons6,
-                                                              site.shortDescription,
-                                                              site.longDescription,
-                                                              site.bonus,
-                                                              site.bgImage)
-
-                                                  )
-                                                  );
-
-                                                },
-                                                child: FittedBox(
-                                                    fit: BoxFit.fitWidth,
-                                                    child: Text("Claim Bonus",style: TextStyle(color: Colors.white),)),
-                                              )
-                                          ),
-                                        ),
-
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          );
-                        })
-                        :
+                    // _searchResult.length!=0 || controller.text.isNotEmpty
+                    //   ?
+                    // ListView.builder(
+                    //     scrollDirection: Axis.horizontal,
+                    //     itemCount: _searchResult.length,
+                    //     itemBuilder: (context,index){
+                    //       Site site = _searchResult[index];
+                    //       index == 0 ? rating = 0 : rating = double.parse(site.ratings);
+                    //       //     rating = double.parse(site.ratings);
+                    //       return Container(
+                    //         padding: EdgeInsets.all(10),
+                    //         child: index == 0 ? Container() : Container(
+                    //           height: height*.5,
+                    //           width: width*.82,
+                    //           decoration: BoxDecoration(
+                    //             color: Colors.white,
+                    //             borderRadius: BorderRadius.all(Radius.circular(20)),
+                    //           ),
+                    //           child: Column(
+                    //             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    //             children: [
+                    //               // Image.network(site.bgImage,height: height*.48*.51,),
+                    //               Container(
+                    //                 padding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                    //                 child: Image.network(
+                    //                   site.bgImage,
+                    //                   fit: BoxFit.cover,
+                    //                   height: height*.48*.51,
+                    //                   loadingBuilder: (BuildContext context, Widget child,
+                    //                       ImageChunkEvent? loadingProgress) {
+                    //                     if (loadingProgress == null) return child;
+                    //                     return Center(
+                    //                       child: CircularProgressIndicator(
+                    //                         value: loadingProgress.expectedTotalBytes != null
+                    //                             ? loadingProgress.cumulativeBytesLoaded /
+                    //                             loadingProgress.expectedTotalBytes!
+                    //                             : null,
+                    //                       ),
+                    //                     );
+                    //                   },
+                    //                 ),
+                    //               ),
+                    //
+                    //
+                    //               Container(
+                    //                 padding: EdgeInsets.symmetric(horizontal: 20),
+                    //                 height: height*.5*.15,
+                    //                 child: Row(
+                    //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //                   children: [
+                    //                     Container(
+                    //                         width: width*0.5,
+                    //                         child: Text(site.title,
+                    //                           style: TextStyle(
+                    //                               fontSize: 18,
+                    //                               fontWeight: FontWeight.w600
+                    //                           ),)
+                    //
+                    //                     ),
+                    //                     //  Image.asset("graphic_res/design_3_assets/3/xbet.png"),
+                    //                     // Image.network(site.logo,width: width*0.20,
+                    //                     //      fit: BoxFit.cover),
+                    //
+                    //                     Container(
+                    //                      // color: Colors.blue,
+                    //                      // padding: EdgeInsets.all(5),
+                    //                       child: Image.network(
+                    //                         site.logo,
+                    //                         fit: BoxFit.contain,
+                    //                         width: width*0.20,
+                    //                         height: height*.5*.10,
+                    //
+                    //                         loadingBuilder: (BuildContext context, Widget child,
+                    //                             ImageChunkEvent? loadingProgress) {
+                    //                           if (loadingProgress == null) return child;
+                    //                           return Center(
+                    //                             child: CircularProgressIndicator(
+                    //                               value: loadingProgress.expectedTotalBytes != null
+                    //                                   ? loadingProgress.cumulativeBytesLoaded /
+                    //                                   loadingProgress.expectedTotalBytes!
+                    //                                   : null,
+                    //                             ),
+                    //                           );
+                    //                         },
+                    //                       ),
+                    //                     ),
+                    //
+                    //                   ],
+                    //                 ),
+                    //               ),
+                    //               Container(
+                    //                 padding: EdgeInsets.symmetric(horizontal: 20),
+                    //                 height: height*.5*.27,
+                    //                 child:
+                    //                 Text(site.shortDescription)
+                    //                 // Text("At the game? Just got a gut feeling?"
+                    //                 //     "No problem! Now you can bet from anywhere,"
+                    //                 //     "anytime with the all-new Xbet mobile betting")
+                    //                 ,
+                    //               ),
+                    //               Container(
+                    //                 padding: EdgeInsets.symmetric(horizontal: 20),
+                    //                 height: height*.48*.097,
+                    //                 child: Row(
+                    //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //                   children: [
+                    //                     Row(
+                    //                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    //                       children: [
+                    //                         Container(
+                    //                           alignment: Alignment.centerLeft,
+                    //                           color: Colors.white,
+                    //                           height: height*.05,
+                    //                           child: StarRating02(
+                    //                             size: 18,
+                    //                             rating: rating,
+                    //                             onRatingChanged: (rating) => setState(() {}),
+                    //                             color: Colors.transparent,
+                    //                           ),
+                    //                         ),
+                    //                         SizedBox(width: 5,),
+                    //                         Text(rating.toString(), style: TextStyle(fontSize: 16 , color: Colors.grey),),
+                    //                       ],
+                    //                     ),
+                    //                     Container(
+                    //                       alignment: Alignment.centerRight,
+                    //                       child: Container(
+                    //                           width: width*0.3,
+                    //                           decoration: BoxDecoration(
+                    //                             color: Color(0xff57bbb4),
+                    //                             borderRadius: BorderRadius.all(Radius.circular(10)),
+                    //                           ),
+                    //                           alignment: Alignment.center,
+                    //                           child:  TextButton(
+                    //                             onPressed: (){
+                    //                               Navigator.push(context, MaterialPageRoute(
+                    //                                   builder: (context) =>
+                    //                                       BetDescriptionScreen(
+                    //                                           site.id,
+                    //                                           site.title,
+                    //                                           site.url,
+                    //                                           site.promocode,
+                    //                                           site.ratings,
+                    //                                           site.feature1,
+                    //                                           site.feature2,
+                    //                                           site.feature3,
+                    //                                           site.feature4,
+                    //                                           site.logo,
+                    //                                           site.addedDate,
+                    //                                           site.feature5,
+                    //                                           site.feature6,
+                    //                                           site.cons1,
+                    //                                           site.cons2,
+                    //                                           site.cons3,
+                    //                                           site.cons4,
+                    //                                           site.cons5,
+                    //                                           site.cons6,
+                    //                                           site.shortDescription,
+                    //                                           site.longDescription,
+                    //                                           site.bonus,
+                    //                                           site.bgImage)
+                    //
+                    //                               )
+                    //                               );
+                    //
+                    //                             },
+                    //                             child: FittedBox(
+                    //                                 fit: BoxFit.fitWidth,
+                    //                                 child: Text("Claim Bonus",style: TextStyle(color: Colors.white),)),
+                    //                           )
+                    //                       ),
+                    //                     ),
+                    //
+                    //                   ],
+                    //                 ),
+                    //               )
+                    //             ],
+                    //           ),
+                    //         ),
+                    //       );
+                    //     })
+                    //     :
                     ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: _sites.length,
@@ -681,14 +681,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                       children: [
                                         Container(
                                             width: width*0.5,
-                                            child: Text(site.title,style: TextStyle(fontSize: 18,fontWeight: FontWeight.w600),)),
+                                            child: Text(site.title,style: TextStyle(fontSize: 18,fontWeight: FontWeight.w600
+                                           // ,color: Colors.bla
+
+                                            ),)),
                                       //  Image.asset("graphic_res/design_3_assets/3/xbet.png"),
                                       // Image.network(site.logo,width: width*0.20,
                                       //      fit: BoxFit.cover),
 
                                         Image.network(
                                           site.logo,
-                                          fit: BoxFit.cover,
+                                          fit: BoxFit.contain,
                                             width: width*0.20,
                                           height: height*.48*.10,
 
