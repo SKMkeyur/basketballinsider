@@ -1,947 +1,465 @@
-import 'package:basketballinsider/models/serviceforsitedata.dart';
-import 'package:basketballinsider/models/sites.dart';
-import 'package:basketballinsider/screens/review01.dart';
-import 'package:basketballinsider/widgets/starratting02.dart';
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-
-import 'aboutus.dart';
-import 'betdescription.dart';
-import 'comparison.dart';
-import 'faqs.dart';
-
-class Home02 extends StatefulWidget {
-  const Home02({Key? key}) : super(key: key);
-
-  @override
-  _Home02State createState() => _Home02State();
-}
-
-class _Home02State extends State<Home02> {
-
-  TextEditingController controller = TextEditingController();
-  late bool isSearching = false;
-  double rating = 3.5;
-
-  List<Site> dogsBreedList = <Site>[];
-  List<Site> tempList = <Site>[];
-  bool isLoading = false;
-
-  @override
-  void initState() {
-    isSearching = false;
-    // TODO: implement initState
-    super.initState();
-    _fetchDogsBreed();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    double safe = MediaQuery.of(context).padding.top;
-    double height1 = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
-    double barheight =AppBar().preferredSize.height;
-    double height = height1-safe-barheight;
-
-    return SafeArea(
-      child: Scaffold(
-        resizeToAvoidBottomInset:false,
-        appBar: AppBar(
-          centerTitle: true,
-          title: isSearching == false ? Text("Home",style: TextStyle(color: Colors.black),textAlign: TextAlign.center,)
-              : TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                hintText: "Enter Bet Name",
-                icon: Icon(Icons.search),
-              ),
-              onChanged: (text){
-                _filterDogList(text);
-              }
-
-            //onSearchTextChanged,
-          ),
-          iconTheme: IconThemeData(color: Colors.black),
-          toolbarHeight: barheight,
-          elevation: 0,
-          backgroundColor: Colors.white,
-          actions: <Widget>[
-            isSearching==true?
-            IconButton(
-              padding: EdgeInsets.fromLTRB(0, 0,40, 0),
-              icon: Icon(
-                Icons.cancel,
-                color: Colors.black,
-              ),
-              onPressed: () {
-                setState(() {
-                  isSearching==false?isSearching=true:isSearching=false;
-
-                });
-                // focusNode.requestFocus();
-
-              },
-            )
-                :
-            IconButton(
-              padding: EdgeInsets.fromLTRB(0, 0,40, 0),
-              icon: Icon(
-                Icons.search,
-                color: Colors.black,
-              ),
-              onPressed: () {
-                setState(() {
-                  isSearching==false?isSearching=true:isSearching=false;
-
-                });
-
-                //  focusNode.requestFocus();
-              },
-            )
-          ],
-        ),
-        drawer: ClipRRect(
-          borderRadius: BorderRadius.only(topRight: Radius.circular(40.0),bottomRight: Radius.circular(40.0)),
-          child: Drawer(
-              child:
-              Container(
-
-                child: Column(
-                  children: [
-                    Container(
-                      width: width,
-                      height: height*.30,
-                      child: Image.asset("graphic_res/Asset 1.png",scale: 2,),
-
-                    ),
-                    Container(
-                      width: width,
-                      height: height*0.60,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          InkWell(
-                            onTap: (){
-                              Navigator.pop(context);
-                              // Navigator.push(context, MaterialPageRoute(
-                              //     builder: (context) => HomeScreen())
-                              // );
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(8),
-                              child: ListTile(
-                                leading: Icon(Icons.home,color: Color(0xff57bbb4),size: 45.0),
-                                title: Text("Home",style: TextStyle(fontSize: 18),),
-                              ),
-                            ),
-                          ),
-                          Container(
-                              padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Divider(height: 0,thickness: 2,)),
-                          InkWell(
-                            onTap: (){
-                              Navigator.push(context, MaterialPageRoute(
-                                  builder: (context) => Review01Screen())
-                              );
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(10),
-                              child: ListTile(
-                                leading: Icon(FontAwesomeIcons.compass,color: Color(0xff57bbb4),size: 40.0),
-                                title: Text("Review",style: TextStyle(fontSize: 18),),
-                              ),
-                            ),
-                          ),
-                          Container(
-                              padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Divider(height: 0,thickness: 2,)),
-
-                          InkWell(
-                            onTap: (){
-                              Navigator.push(context, MaterialPageRoute(
-                                  builder: (context) => ComparisonScreen())
-                              );
-
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(10),
-                              child: ListTile(
-                                leading: Icon(Icons.compare,color: Color(0xff57bbb4),size: 40.0),
-                                title: Text("Comparison ",style: TextStyle(fontSize: 18),),
-                              ),
-                            ),
-                          ),
-                          Container(
-                              padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Divider(height: 0,thickness: 2,)),
-
-                          InkWell(
-                            onTap: (){
-                              Navigator.push(context, MaterialPageRoute(
-                                  builder: (context) => Faqs())
-                              );
-                              //  Navigator.pop(context);
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(10),
-                              child: ListTile(
-                                leading: Icon(FontAwesomeIcons.moneyCheck,color:Color(0xff57bbb4),size: 30.0),
-                                title: Text("FAQ",style: TextStyle(fontSize: 18),),
-                              ),
-                            ),
-                          ),
-                          Container(
-                              padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Divider(height: 0,thickness: 2,)),
-
-                          InkWell(
-                            onTap: (){
-                              Navigator.push(context, MaterialPageRoute(
-                                  builder: (context) => AboutUsScreen())
-                              );
-                              //  Navigator.pop(context);
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(10),
-                              child: ListTile(
-                                leading: Icon(FontAwesomeIcons.users,color:Color(0xff57bbb4),size: 30.0),
-                                title: Text("About US",style: TextStyle(fontSize: 18),),
-                              ),
-                            ),
-                          ),
-
-
-
-                        ],
-                      ),
-                    ),
-                    // Container(
-                    //   // color: Colors.red,
-                    //   height: height - height*0.42 - height*.2933,
-                    //   alignment: Alignment.bottomCenter,
-                    //   child: Container(
-                    //     //height: height*.2,
-                    //     child: ButtonContainer("LOGOUT",DarkBlue),
-                    //   ),
-                    // ),
-
-                  ],
-                ),
-              )
-
-            // ListView(
-            //   // Important: Remove any padding from the ListView.
-            //   padding: EdgeInsets.zero,
-            //   children: [
-            //     const DrawerHeader(
-            //       decoration: BoxDecoration(
-            //         color: Colors.blue,
-            //       ),
-            //       child: Text('Drawer Header'),
-            //     ),
-            //     ListTile(
-            //       title: const Text('Item 1'),
-            //       onTap: () {
-            //         // Update the state of the app.
-            //         // ...
-            //       },
-            //     ),
-            //     ListTile(
-            //       title: const Text('Item 2'),
-            //       onTap: () {
-            //         // Update the state of the app.
-            //         // ...
-            //       },
-            //     ),
-            //   ],
-            // ),
-          ),
-        ),
-        body: Container(
-          decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF03185A),
-                  Color(0xFF003900),
-                ],
-                begin: FractionalOffset(0.0, 0.0),
-                end: FractionalOffset(0.0, 1.0),
-              )
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                height: height*.22,
-                child: Column(
-                  children:  [
-                    SizedBox(height:10,),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5),
-                      child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text("Best Mobile Sports Betting Apps",style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w600),)),
-                    ),
-                    Padding(
-                      //padding: EdgeInsets.symmetric(horizontal: 20),
-                      padding: EdgeInsets.fromLTRB(20, 0, 20, 5),
-                      child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text("Looking for the best sports betting app US to wager on tonight's game? Thanks to the recent explosion"
-                              "in sports betting, there are now dozens of sports betting apps to choose from"
-                              "",style: TextStyle(color: Colors.white,fontSize: 14,fontWeight: FontWeight.w100,height: 1.5),)
-                      ),
-                    ),
-
-                    Divider(height: height*0.011,color: Colors.white,thickness: height*0.0029,),
-                    // Padding(
-                    //   //padding: EdgeInsets.symmetric(horizontal: 20),
-                    //   padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-                    //   child: Align(
-                    //       alignment: Alignment.centerLeft,
-                    //       child: Row(
-                    //         children: [
-                    //           Container(  //Friday, 20 July 13:50
-                    //             width: width*0.7,
-                    //             child: Text("$formattedDate"+" "+_now+
-                    //                 "",
-                    //               style: TextStyle(color: Colors.white,fontSize: 14,fontWeight: FontWeight.w400,height: 1.5),),
-                    //           ),
-                    //
-                    //           Text(
-                    //             "26°",style: TextStyle(color: Colors.white,fontSize: 14,fontWeight: FontWeight.w400,height: 1.5),
-                    //           ),
-                    //           SizedBox(width: 5,),
-                    //           Icon(Icons.wb_sunny_rounded ,color: Colors.yellow,size: 18,),
-                    //         ],
-                    //       )
-                    //   ),
-                    // ),
-
-                    //Divider(height: height*0.011,color: Colors.white,thickness: height*0.0029,),
-                  ],
-                ),
-
-              ),
-              Container(
-                //  flex: 1,
-                child:
-                isLoading?
-                CircularProgressIndicator():
-                Container(
-                    height: height*0.7,
-                    child:
-                    controller.text.isNotEmpty ?
-                    ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: dogsBreedList.length,
-                        itemBuilder: (context,index){
-                          Site site = dogsBreedList[index];
-                          // index == 0 ? rating = 0 :
-                          rating = double.parse(site.ratings);
-                          return  Container(
-                            padding: EdgeInsets.all(10),
-                            child:
-                            //index == 0 ? Container() :
-                            Container(
-                              height: height*.5,
-                              width: width*.82,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.all(Radius.circular(20)),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  // Image.network(site.bgImage,height: height*.48*.51,),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-                                    child: Image.network(
-                                      site.bgImage,
-                                      fit: BoxFit.cover,
-                                      height: height*.48*.51,
-                                      loadingBuilder: (BuildContext context, Widget child,
-                                          ImageChunkEvent? loadingProgress) {
-                                        if (loadingProgress == null) return child;
-                                        return Center(
-                                          child: CircularProgressIndicator(
-                                            value: loadingProgress.expectedTotalBytes != null
-                                                ? loadingProgress.cumulativeBytesLoaded /
-                                                loadingProgress.expectedTotalBytes!
-                                                : null,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-
-
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 20),
-                                    height: height*.5*.15,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Container(
-                                            width: width*0.5,
-                                            child: Text(site.title,style: TextStyle(fontSize: 18,fontWeight: FontWeight.w600
-                                              // ,color: Colors.bla
-
-                                            ),)),
-                                        //  Image.asset("graphic_res/design_3_assets/3/xbet.png"),
-                                        // Image.network(site.logo,width: width*0.20,
-                                        //      fit: BoxFit.cover),
-
-                                        Image.network(
-                                          site.logo,
-                                          fit: BoxFit.contain,
-                                          width: width*0.20,
-                                          height: height*.48*.10,
-
-                                          loadingBuilder: (BuildContext context, Widget child,
-                                              ImageChunkEvent? loadingProgress) {
-                                            if (loadingProgress == null) return child;
-                                            return Center(
-                                              child: CircularProgressIndicator(
-                                                value: loadingProgress.expectedTotalBytes != null
-                                                    ? loadingProgress.cumulativeBytesLoaded /
-                                                    loadingProgress.expectedTotalBytes!
-                                                    : null,
-                                              ),
-                                            );
-                                          },
-                                        ),
-
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 20),
-                                    height: height*.5*.27,
-                                    child:
-                                    Text(site.shortDescription)
-                                    // Text("At the game? Just got a gut feeling?"
-                                    //     "No problem! Now you can bet from anywhere,"
-                                    //     "anytime with the all-new Xbet mobile betting")
-                                    ,
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 20),
-                                    height: height*.48*.097,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            Container(
-                                              alignment: Alignment.centerLeft,
-                                              color: Colors.white,
-                                              height: height*.05,
-                                              child: StarRating02(
-                                                size: 18,
-                                                rating: rating,
-                                                onRatingChanged: (rating) => setState(() {}),
-                                                color: Colors.transparent,
-                                              ),
-                                            ),
-                                            SizedBox(width: 5,),
-                                            Text(rating.toString(), style: TextStyle(fontSize: 16 , color: Colors.grey),),
-                                          ],
-                                        ),
-                                        Container(
-                                          alignment: Alignment.centerRight,
-                                          child: Container(
-                                              width: width*0.3,
-                                              decoration: BoxDecoration(
-                                                color: Color(0xff57bbb4),
-                                                borderRadius: BorderRadius.all(Radius.circular(10)),
-                                              ),
-                                              alignment: Alignment.center,
-                                              child:  TextButton(
-                                                onPressed: (){
-                                                  Navigator.push(context, MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          BetDescriptionScreen(
-                                                              site.id,
-                                                              site.title,
-                                                              site.url,
-                                                              site.promocode,
-                                                              site.ratings,
-                                                              site.feature1,
-                                                              site.feature2,
-                                                              site.feature3,
-                                                              site.feature4,
-                                                              site.logo,
-                                                              site.addedDate,
-                                                              site.feature5,
-                                                              site.feature6,
-                                                              site.cons1,
-                                                              site.cons2,
-                                                              site.cons3,
-                                                              site.cons4,
-                                                              site.cons5,
-                                                              site.cons6,
-                                                              site.shortDescription,
-                                                              site.longDescription,
-                                                              site.bonus,
-                                                              site.bgImage)
-
-                                                  )
-                                                  );
-
-                                                },
-                                                child: FittedBox(
-                                                    fit: BoxFit.fitWidth,
-                                                    child: Text("Claim Bonus",style: TextStyle(color: Colors.white),)),
-                                              )
-                                          ),
-                                        ),
-
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          );
-                        })
-                        :
-                    ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: dogsBreedList.length,
-                        itemBuilder: (context,index){
-                          Site site = dogsBreedList[index];
-                          index == 0 ? rating = 0 : rating = double.parse(site.ratings);
-                          return  Container(
-                            padding: EdgeInsets.all(10),
-                            child:
-                            index == 0 ? Container() :
-                            Container(
-                              height: height*.5,
-                              width: width*.82,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.all(Radius.circular(20)),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  // Image.network(site.bgImage,height: height*.48*.51,),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-                                    child: Image.network(
-                                      site.bgImage,
-                                      fit: BoxFit.cover,
-                                      height: height*.48*.51,
-                                      loadingBuilder: (BuildContext context, Widget child,
-                                          ImageChunkEvent? loadingProgress) {
-                                        if (loadingProgress == null) return child;
-                                        return Center(
-                                          child: CircularProgressIndicator(
-                                            value: loadingProgress.expectedTotalBytes != null
-                                                ? loadingProgress.cumulativeBytesLoaded /
-                                                loadingProgress.expectedTotalBytes!
-                                                : null,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-
-
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 20),
-                                    height: height*.5*.15,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Container(
-                                            width: width*0.5,
-                                            child: Text(site.title,style: TextStyle(fontSize: 18,fontWeight: FontWeight.w600
-                                              // ,color: Colors.bla
-
-                                            ),)),
-                                        //  Image.asset("graphic_res/design_3_assets/3/xbet.png"),
-                                        // Image.network(site.logo,width: width*0.20,
-                                        //      fit: BoxFit.cover),
-
-                                        Image.network(
-                                          site.logo,
-                                          fit: BoxFit.contain,
-                                          width: width*0.20,
-                                          height: height*.48*.10,
-
-                                          loadingBuilder: (BuildContext context, Widget child,
-                                              ImageChunkEvent? loadingProgress) {
-                                            if (loadingProgress == null) return child;
-                                            return Center(
-                                              child: CircularProgressIndicator(
-                                                value: loadingProgress.expectedTotalBytes != null
-                                                    ? loadingProgress.cumulativeBytesLoaded /
-                                                    loadingProgress.expectedTotalBytes!
-                                                    : null,
-                                              ),
-                                            );
-                                          },
-                                        ),
-
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 20),
-                                    height: height*.5*.27,
-                                    child:
-                                    Text(site.shortDescription)
-                                    // Text("At the game? Just got a gut feeling?"
-                                    //     "No problem! Now you can bet from anywhere,"
-                                    //     "anytime with the all-new Xbet mobile betting")
-                                    ,
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 20),
-                                    height: height*.48*.097,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            Container(
-                                              alignment: Alignment.centerLeft,
-                                              color: Colors.white,
-                                              height: height*.05,
-                                              child: StarRating02(
-                                                size: 18,
-                                                rating: rating,
-                                                onRatingChanged: (rating) => setState(() {}),
-                                                color: Colors.transparent,
-                                              ),
-                                            ),
-                                            SizedBox(width: 5,),
-                                            Text(rating.toString(), style: TextStyle(fontSize: 16 , color: Colors.grey),),
-                                          ],
-                                        ),
-                                        Container(
-                                          alignment: Alignment.centerRight,
-                                          child: Container(
-                                              width: width*0.3,
-                                              decoration: BoxDecoration(
-                                                color: Color(0xff57bbb4),
-                                                borderRadius: BorderRadius.all(Radius.circular(10)),
-                                              ),
-                                              alignment: Alignment.center,
-                                              child:  TextButton(
-                                                onPressed: (){
-                                                  Navigator.push(context, MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          BetDescriptionScreen(
-                                                              site.id,
-                                                              site.title,
-                                                              site.url,
-                                                              site.promocode,
-                                                              site.ratings,
-                                                              site.feature1,
-                                                              site.feature2,
-                                                              site.feature3,
-                                                              site.feature4,
-                                                              site.logo,
-                                                              site.addedDate,
-                                                              site.feature5,
-                                                              site.feature6,
-                                                              site.cons1,
-                                                              site.cons2,
-                                                              site.cons3,
-                                                              site.cons4,
-                                                              site.cons5,
-                                                              site.cons6,
-                                                              site.shortDescription,
-                                                              site.longDescription,
-                                                              site.bonus,
-                                                              site.bgImage)
-
-                                                  )
-                                                  );
-
-                                                },
-                                                child: FittedBox(
-                                                    fit: BoxFit.fitWidth,
-                                                    child: Text("Claim Bonus",style: TextStyle(color: Colors.white),)),
-                                              )
-                                          ),
-                                        ),
-
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          );
-                        })
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Widget _searchBar(){
-  //   return Container(
-  //     padding: EdgeInsets.only(bottom: 16.0),
-  //     child: TextField(
-  //       decoration: InputDecoration(
-  //         hintText: "Search Dog Breeds Here...",
-  //         prefixIcon: Icon(Icons.search),
-  //       ),
-  //       onChanged: (text){
-  //         _filterDogList(text);
-  //       },
-  //     ),
-  //   );
-  // }
-  //
-  // Widget _mainData(){
-  //   return Center(
-  //     child: isLoading?
-  //     CircularProgressIndicator():
-  //     ListView.builder(
-  //         itemCount: dogsBreedList.length,
-  //         itemBuilder: (context,index){
-  //           return ListTile(
-  //               title: Text(dogsBreedList[index].title,)
-  //           );
-  //         }),
-  //   );
-  // }
-
-  //
-  // Widget _mainData(){
-  //   return Center(
-  //     child: isLoading?
-  //     CircularProgressIndicator():
-  //     ListView.builder(
-  //         scrollDirection: Axis.horizontal,
-  //         itemCount: dogsBreedList.length,
-  //         itemBuilder: (context,index){
-  //           Site site = dogsBreedList[index];
-  //           index == 0 ? rating = 0 : rating = double.parse(site.ratings);
-  //           return  Container(
-  //             padding: EdgeInsets.all(10),
-  //             child: index == 0 ? Container() : Container(
-  //               height: height*.5,
-  //               width: width*.82,
-  //               decoration: BoxDecoration(
-  //                 color: Colors.white,
-  //                 borderRadius: BorderRadius.all(Radius.circular(20)),
-  //               ),
-  //               child: Column(
-  //                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  //                 children: [
-  //                   // Image.network(site.bgImage,height: height*.48*.51,),
-  //                   Container(
-  //                     padding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-  //                     child: Image.network(
-  //                       site.bgImage,
-  //                       fit: BoxFit.cover,
-  //                       height: height*.48*.51,
-  //                       loadingBuilder: (BuildContext context, Widget child,
-  //                           ImageChunkEvent? loadingProgress) {
-  //                         if (loadingProgress == null) return child;
-  //                         return Center(
-  //                           child: CircularProgressIndicator(
-  //                             value: loadingProgress.expectedTotalBytes != null
-  //                                 ? loadingProgress.cumulativeBytesLoaded /
-  //                                 loadingProgress.expectedTotalBytes!
-  //                                 : null,
-  //                           ),
-  //                         );
-  //                       },
-  //                     ),
-  //                   ),
-  //
-  //
-  //                   Container(
-  //                     padding: EdgeInsets.symmetric(horizontal: 20),
-  //                     height: height*.5*.15,
-  //                     child: Row(
-  //                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                       children: [
-  //                         Container(
-  //                             width: width*0.5,
-  //                             child: Text(site.title,style: TextStyle(fontSize: 18,fontWeight: FontWeight.w600
-  //                               // ,color: Colors.bla
-  //
-  //                             ),)),
-  //                         //  Image.asset("graphic_res/design_3_assets/3/xbet.png"),
-  //                         // Image.network(site.logo,width: width*0.20,
-  //                         //      fit: BoxFit.cover),
-  //
-  //                         Image.network(
-  //                           site.logo,
-  //                           fit: BoxFit.contain,
-  //                           width: width*0.20,
-  //                           height: height*.48*.10,
-  //
-  //                           loadingBuilder: (BuildContext context, Widget child,
-  //                               ImageChunkEvent? loadingProgress) {
-  //                             if (loadingProgress == null) return child;
-  //                             return Center(
-  //                               child: CircularProgressIndicator(
-  //                                 value: loadingProgress.expectedTotalBytes != null
-  //                                     ? loadingProgress.cumulativeBytesLoaded /
-  //                                     loadingProgress.expectedTotalBytes!
-  //                                     : null,
-  //                               ),
-  //                             );
-  //                           },
-  //                         ),
-  //
-  //                       ],
-  //                     ),
-  //                   ),
-  //                   Container(
-  //                     padding: EdgeInsets.symmetric(horizontal: 20),
-  //                     height: height*.5*.27,
-  //                     child:
-  //                     Text(site.shortDescription)
-  //                     // Text("At the game? Just got a gut feeling?"
-  //                     //     "No problem! Now you can bet from anywhere,"
-  //                     //     "anytime with the all-new Xbet mobile betting")
-  //                     ,
-  //                   ),
-  //                   Container(
-  //                     padding: EdgeInsets.symmetric(horizontal: 20),
-  //                     height: height*.48*.097,
-  //                     child: Row(
-  //                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                       children: [
-  //                         Row(
-  //                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  //                           children: [
-  //                             Container(
-  //                               alignment: Alignment.centerLeft,
-  //                               color: Colors.white,
-  //                               height: height*.05,
-  //                               child: StarRating02(
-  //                                 size: 18,
-  //                                 rating: rating,
-  //                                 onRatingChanged: (rating) => setState(() {}),
-  //                                 color: Colors.transparent,
-  //                               ),
-  //                             ),
-  //                             SizedBox(width: 5,),
-  //                             Text(rating.toString(), style: TextStyle(fontSize: 16 , color: Colors.grey),),
-  //                           ],
-  //                         ),
-  //                         Container(
-  //                           alignment: Alignment.centerRight,
-  //                           child: Container(
-  //                               width: width*0.3,
-  //                               decoration: BoxDecoration(
-  //                                 color: Color(0xff57bbb4),
-  //                                 borderRadius: BorderRadius.all(Radius.circular(10)),
-  //                               ),
-  //                               alignment: Alignment.center,
-  //                               child:  TextButton(
-  //                                 onPressed: (){
-  //                                   Navigator.push(context, MaterialPageRoute(
-  //                                       builder: (context) =>
-  //                                           BetDescriptionScreen(
-  //                                               site.id,
-  //                                               site.title,
-  //                                               site.url,
-  //                                               site.promocode,
-  //                                               site.ratings,
-  //                                               site.feature1,
-  //                                               site.feature2,
-  //                                               site.feature3,
-  //                                               site.feature4,
-  //                                               site.logo,
-  //                                               site.addedDate,
-  //                                               site.feature5,
-  //                                               site.feature6,
-  //                                               site.cons1,
-  //                                               site.cons2,
-  //                                               site.cons3,
-  //                                               site.cons4,
-  //                                               site.cons5,
-  //                                               site.cons6,
-  //                                               site.shortDescription,
-  //                                               site.longDescription,
-  //                                               site.bonus,
-  //                                               site.bgImage)
-  //
-  //                                   )
-  //                                   );
-  //
-  //                                 },
-  //                                 child: FittedBox(
-  //                                     fit: BoxFit.fitWidth,
-  //                                     child: Text("Claim Bonus",style: TextStyle(color: Colors.white),)),
-  //                               )
-  //                           ),
-  //                         ),
-  //
-  //                       ],
-  //                     ),
-  //                   )
-  //                 ],
-  //               ),
-  //             ),
-  //           );
-  //         }),
-  //   );
-  // }
-
-
-
-
-
-
-
-
-
-
-
-  _filterDogList(String text) {
-    if(text.isEmpty){
-      setState(() {
-        dogsBreedList = tempList;
-      });
-    }
-    else{
-      final List<Site> filteredBreeds = <Site>[];
-      tempList.map((breed){
-        if(breed.title.toLowerCase().contains(text.toString().toLowerCase())){
-          filteredBreeds.add(breed);
-        }
-      }).toList();
-      setState(() {
-        dogsBreedList = filteredBreeds;
-      });
-    }
-  }
-
-  _fetchDogsBreed() async{
-    setState(() {
-      isLoading = true;
-    });
-    tempList = <Site>[];
-    SiteServices.getUsers().then((sites){
-      tempList = sites;
-      setState(() {
-        dogsBreedList = tempList;
-        isLoading = false;
-      });
-    });
-
-  }
-}
+// import 'dart:async';
+// import 'dart:math';
+// import 'package:basketballinsider/models/fixtures_by_date_range_football.dart' as v1;
+// import 'package:basketballinsider/models/leage_by_id_football.dart';
+// import 'package:basketballinsider/models/round_by_id_football.dart';
+// import 'package:basketballinsider/models/services.dart';
+// import 'package:basketballinsider/models/sites.dart';
+// import 'package:basketballinsider/models/team_by_id_football.dart';
+// import 'package:basketballinsider/models/venue_id_football.dart';
+// import 'package:basketballinsider/screens/aboutus.dart';
+// import 'package:basketballinsider/screens/betdescription.dart';
+// import 'package:basketballinsider/screens/comparison.dart';
+// import 'package:basketballinsider/screens/faqs.dart';
+// import 'fixture_match_data_football_upcoming.dart';
+// import 'package:basketballinsider/screens/review.dart';
+// import 'package:basketballinsider/screens/review01.dart';
+// import 'package:basketballinsider/services/get_fixtures_by_date_range_football.dart';
+// import 'package:basketballinsider/services/get_leage_by_id_football.dart';
+// import 'package:basketballinsider/services/get_team_by_id_football.dart';
+// import 'package:basketballinsider/widgets/card.dart';
+// import 'package:basketballinsider/widgets/starrating.dart';
+// import 'package:basketballinsider/widgets/starratting02.dart';
+// import 'package:flutter/material.dart';
+// import 'package:basketballinsider/models/options.dart';
+// import 'package:basketballinsider/screens/getstarted02.dart';
+// import 'package:basketballinsider/screens/getstarted01.dart';
+// import 'package:basketballinsider/screens/getstarted03.dart';
+// import 'package:basketballinsider/screens/getstarted04.dart';
+// import 'package:carousel_slider/carousel_controller.dart';
+// import 'package:carousel_slider/carousel_slider.dart';
+// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// //import 'package:weather/weather.dart';
+// import 'package:intl/intl.dart';
+//
+// class Home02 extends StatefulWidget {
+//   const Home02({Key? key}) : super(key: key);
+//
+//   @override
+//   _Home02State createState() => _Home02State();
+// }
+//
+// class _Home02State extends State<Home02> {
+//   late Map<int,String> localteam= {};
+//   late Map<int,String> visitorteam= {};
+//   late Map<int,String> league= {};
+//   late Map<int,String> localteamlogo= {};
+//   late Map<int,String> visitorteamlogo= {};
+//
+//   bool isLoading0 = false;
+//   bool isLoading1 = true;
+//   bool isLoading2 = true;
+//   bool isLoading3 = true;
+//   bool isLoading4 = true;
+//   bool isLoading5 = true;
+//   bool isLoading6 = true;
+//   bool isLoading7 = true;
+//
+//   Map<int,String> monthsInYear = {
+//     1: "Jan",
+//     2: "Feb",
+//     3: "Mar",
+//     4: "Apr",
+//     5: "May",
+//     6: "June",
+//     7: "July",
+//     8: "Aug",
+//     9: "Sep",
+//     10: "Oct",
+//     11: "Nov",
+//     12: "Dec",
+//   };
+//
+//   late v1.FixturesByDateRangeFootball fixturesByDateRangeFootball;
+//   late Leage leage;
+//   late TeamByIdFootball teamByIdFootball;
+//   late TeamByIdFootball oppositeteamByIdFootball1;
+//   late VenueByIdFootball venueByIdFootball;
+//   late RoundByIdFootball roundByIdFootball;
+//   getFixtureByDateRange() async{
+//     setState(() {
+//       isLoading0 = true;
+//       isLoading6 = true;
+//       isLoading7 = true;
+//       isLoading1 = true;
+//     });
+//     // print(widget.id.toString());
+//
+//     GetFixturesByDateRangeFootballService.getUsers("","").then((sites){
+//       print(sites);
+//
+//       if(sites!=null) {
+//         setState(() {
+//           print("dd");
+//           fixturesByDateRangeFootball = sites;
+//           print("scores ==  "+fixturesByDateRangeFootball.data!.length.toString());
+//           isLoading0 = false;
+//
+//           for(int i=0;i<fixturesByDateRangeFootball.data!.length;i++){
+//             String Id = fixturesByDateRangeFootball.data![i].localteamId.toString();
+//             String Id1 = fixturesByDateRangeFootball.data![i].visitorteamId.toString();
+//             String Id2= fixturesByDateRangeFootball.data![i].leagueId.toString();
+//             print(Id);
+//             GetTeamByIdFootvball.getUsers(Id).then((sites){
+//                 if(sites!=null){
+//                   setState(() {
+//
+//                     teamByIdFootball = sites;
+//                   if(teamByIdFootball.data!=null) {
+//                       localteam[i] = teamByIdFootball.data!.name.toString();
+//                       localteamlogo[i] =
+//                           teamByIdFootball.data!.logoPath.toString();
+//                       print(teamByIdFootball.data!.id.toString());
+//                       print(localteam);
+//                       print(localteam.length);
+//                       if (fixturesByDateRangeFootball.data!.length >=
+//                           localteam.length) {
+//                         isLoading6 = false;
+//                         print(isLoading6);
+//
+//                       }
+//                   }
+//                   });
+//
+//                 }
+//
+//                 });
+//
+//             GetTeamByIdFootvball.getUsers(Id1).then((sites){
+//               // setState(() {
+//                // print(sites);
+//                 if(sites!=null){
+//                   teamByIdFootball = sites;
+//                   if(teamByIdFootball.data!=null){
+//                     visitorteam[i]=teamByIdFootball.data!.name.toString();
+//                     visitorteamlogo[i]=teamByIdFootball.data!.logoPath.toString();
+//                     print(teamByIdFootball.data!.id.toString());
+//                     print(visitorteam);
+//                   }
+//                   if(fixturesByDateRangeFootball.data!.length==visitorteam.length){
+//                     isLoading7 = false;
+//                   }
+//                 }
+//               // });
+//             });
+//
+//             GetLeageByIdServices.getUsers(Id2).then((sites){
+//                setState(() {
+//                 if(sites!=null){
+//                   leage = sites;
+//                   league[i]=leage.data.name.toString();
+//                   // leaguesname.add(leage.data.name);
+//                   if(fixturesByDateRangeFootball.data!.length==league.length){
+//                     isLoading1 = false;
+//                   }
+//                 }
+//                });
+//             });
+//
+//
+//
+//           }
+//
+//
+//
+//         });
+//       }
+//     });
+//   }
+//
+//
+//   getTeam() async{
+//     setState(() {
+//       isLoading0 = true;
+//       isLoading6 = true;
+//     });
+//
+//     GetFixturesByDateRangeFootballService.getUsers("","").then((sites){
+//       print(sites);
+//       if(sites!=null) {
+//         setState(() {
+//           print("dd");
+//           fixturesByDateRangeFootball = sites;
+//           print("scores ==  "+fixturesByDateRangeFootball.data!.length.toString());
+//           isLoading0 = false;
+//
+//           for(int i=0;i<fixturesByDateRangeFootball.data!.length;i++){
+//             String Id = fixturesByDateRangeFootball.data![i].localteamId.toString();
+//             print(i);
+//             GetTeamByIdFootvball.getUsers(Id).then((sites){
+//               if(sites!=null){
+//                 setState(() {
+//
+//                   teamByIdFootball = sites;
+//                   if(teamByIdFootball.data!=null) {
+//                     localteam[i] = teamByIdFootball.data!.name.toString();
+//                     localteamlogo[i] =
+//                         teamByIdFootball.data!.logoPath.toString();
+//                     print(teamByIdFootball.data!.id.toString());
+//                     print(localteam);
+//                     print(localteam.length);
+//                     if (fixturesByDateRangeFootball.data!.length >=
+//                         localteam.length) {
+//                       isLoading6 = false;
+//                       print(isLoading6);
+//
+//                     }
+//                   }
+//                 });
+//
+//               }
+//
+//             });
+//
+//
+//           }
+//
+//
+//
+//         });
+//       }
+//     });
+//   }
+//
+//
+//
+//
+//   @override
+//   void initState() {
+//     // TODO: implement initState
+//     super.initState();
+//     getFixtureByDateRange();
+//     // getTeam();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final now = DateTime.now();
+//     final today = DateTime(now.year, now.month, now.day);
+//  double safe = MediaQuery.of(context).padding.top;
+//     double height1 = MediaQuery.of(context).size.height;
+//     double width = MediaQuery.of(context).size.width;
+//     double barheight =AppBar().preferredSize.height;
+//     double height = height1-safe;
+//
+//     return SafeArea(
+//       child: Scaffold(
+//         resizeToAvoidBottomInset: false,
+//         body: Container(
+//           height: height,
+//           color: Colors.black,
+//           alignment: Alignment.center,
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//             children: [
+//               Container(
+//                 height: height*0.2,
+//                 // color: Colors.red,
+//                 child:
+//                 isLoading0 == false ?
+//                 ListView.builder(
+//                     scrollDirection: Axis.horizontal,
+//                     itemCount: fixturesByDateRangeFootball.data!.length,
+//                     itemBuilder: (context,index){
+//                       return InkWell(
+//                         onTap: () {
+//                           Navigator.push(context,
+//                               MaterialPageRoute(
+//                                   builder: (context) =>
+//                                       FixtureMatchDataFootballUpcomingScreen(fixturesByDateRangeFootball.data![index].id!)
+//                               )
+//                           );
+//                         }
+//                         ,
+//                         child: Container(
+//
+//                           margin: EdgeInsets.symmetric(horizontal: 5),
+//                           padding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+//                           decoration: BoxDecoration(
+//                             color: Color(0xff083471),
+//                             borderRadius: BorderRadius.all(Radius.circular(20)),
+//                           ),
+//                           height: height*0.2,
+//                           width: width*0.8,
+//                           child: Column(
+//                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                             children: [
+//                               Row(
+//                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                                 children: [
+//                                   Text(fixturesByDateRangeFootball.data![index].time!.startingAt!.date!.day.toString()+" "+
+//                                       monthsInYear[fixturesByDateRangeFootball.data![index].time!.startingAt!.date!.month]!,style: TextStyle(color: Colors.white),),
+//                                   Text(
+//
+//                                       isLoading1==false?
+//                                           league[index].toString()
+//                                           // fixturesByDateRangeFootball.data![index].leagueId.toString()
+//                                       // leaguesname[index]
+//                                           :""
+//
+//                                       ,style: TextStyle(color: Colors.white)),
+//                                   Row(
+//                                     crossAxisAlignment: CrossAxisAlignment.center,
+//                                     children: [
+//                                       Icon(FontAwesomeIcons.dotCircle,color: Colors.red,size: 14,),
+//                                       Text(" Live",style: TextStyle(color: Colors.red)),
+//                                     ],
+//                                   )
+//                                 ],
+//                               ),
+//                               Row(
+//                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                                 children: [
+//                                   Container(
+//                                     alignment: Alignment.center,
+//                                     width: width*0.25,
+//                                     child: Column(
+//                                       children: [
+//                                         Container(
+//                                           width: width*0.1,
+//                                           height: 50,
+//                                           child:  isLoading6==false?
+//                                           Image.network(
+//                                             localteamlogo[index].toString()
+//                                             // teamlogo[index]
+//
+//                                             // teamlogo1[0].logolink.toString()
+//                                             ,
+//                                             fit: BoxFit.contain,
+//                                             height: height*.48*.51,
+//                                             loadingBuilder: (BuildContext context, Widget child,
+//                                                 ImageChunkEvent? loadingProgress) {
+//                                               if (loadingProgress == null) return child;
+//                                               return Center(
+//                                                 child: CircularProgressIndicator(
+//                                                   value: loadingProgress.expectedTotalBytes != null
+//                                                       ? loadingProgress.cumulativeBytesLoaded /
+//                                                       loadingProgress.expectedTotalBytes!
+//                                                       : null,
+//                                                 ),
+//                                               );
+//                                             },
+//                                           )
+//                                               :
+//                                           Container(
+//                                             color: Colors.red,
+//                                           ),
+//                                         ),//TODO put image here
+//                                         Text(isLoading6==false?
+//                                             localteam[index].toString()
+//                                             // fixturesByDateRangeFootball.data![index].localteamId.toString()
+//                                         // teamname[index]
+//                                             : "" ,style: TextStyle(color: Colors.white)),
+//
+//                                       ],
+//                                     ),
+//                                   ),
+//                                   Container(
+//                                       width: width*0.2,
+//                                       height: 50,
+//                                       child: Opacity(
+//                                           opacity: 0.4,
+//                                           child: Image.asset("graphic_res/football.png",fit: BoxFit.contain,))),
+//                                   Container(
+//                                     // color: Colors.red,
+//                                     width: width*0.25,
+//                                     alignment: Alignment.center,
+//
+//                                     child: Column(
+//                                       children: [
+//                                         Container(
+//                                           width: width*0.1,
+//                                           height: 50,
+//                                           child: isLoading7==false?
+//                                           Image.network(
+//                                             visitorteamlogo[index].toString()
+//                                             // oppositeteamlogo[index]
+//                                             ,
+//                                             fit: BoxFit.contain,
+//                                             height: height*.48*.51,
+//                                             loadingBuilder: (BuildContext context, Widget child,
+//                                                 ImageChunkEvent? loadingProgress) {
+//                                               if (loadingProgress == null) return child;
+//                                               return Center(
+//                                                 child: CircularProgressIndicator(
+//                                                   value: loadingProgress.expectedTotalBytes != null
+//                                                       ? loadingProgress.cumulativeBytesLoaded /
+//                                                       loadingProgress.expectedTotalBytes!
+//                                                       : null,
+//                                                 ),
+//                                               );
+//                                             },
+//                                           )
+//                                               :
+//                                           Container(),
+//                                           // Image.asset('graphic_res/england.png'),
+//                                         ),//TODO put image here
+//                                         Text(
+//                                             isLoading7==false?
+//                                                 visitorteam[index]!
+//                                             // fixturesByDateRangeFootball.data![index].visitorteamId.toString()
+//                                         // oppositeteamname[index]
+//                                             : "",style: TextStyle(color: Colors.white)),
+//
+//                                       ],
+//                                     ),
+//                                   )
+//                                 ],
+//                               ),
+//                               Divider(height: height*0.011,color: Colors.white,thickness: height*0.0029,),
+//                               Row(
+//                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                                 children: [
+//                                   Text(
+//                                       int.parse(fixturesByDateRangeFootball.data![index].time!.startingAt!.time!.substring(0,2))>12?
+//                                       (int.parse(fixturesByDateRangeFootball.data![index].time!.startingAt!.time!.substring(0,2))-12).toString() + " PM"
+//                                           :
+//                                       int.parse(fixturesByDateRangeFootball.data![index].time!.startingAt!.time!.substring(0,2))==12?
+//                                       (int.parse(fixturesByDateRangeFootball.data![index].time!.startingAt!.time!.substring(0,2))).toString() + " PM"
+//                                           :
+//                                       fixturesByDateRangeFootball.data![index].time!.startingAt!.time!.substring(0,2) + " AM"
+//
+//
+//
+//                                       ,style: TextStyle(color: Colors.white)),
+//                                   Text("",style: TextStyle(color: Colors.white))
+//                                 ],
+//                               )
+//                             ],
+//                           ),
+//                         ),
+//                       );
+//                     })
+//                     : Container()
+//                 ,
+//               ),
+//               // Container(
+//               //   alignment: Alignment.center,
+//               //   height: height*0.2,
+//               //   color: Colors.red,
+//               //   child: InkWell(
+//               //     onTap: (){
+//               //       setState(() {
+//               //         localteam[2]="hello3";
+//               //         print(localteam);
+//               //         print(localteam[1]);
+//               //       });
+//               //
+//               //     },
+//               //     child: Container(
+//               //       width: width*0.4,
+//               //       height: height*0.1,
+//               //       color: Colors.blue,
+//               //     ),
+//               //   ),
+//               // )
+//             ],
+//           )
+//           ,
+//         ),
+//
+//       ),
+//     );
+//   }
+// }
+//

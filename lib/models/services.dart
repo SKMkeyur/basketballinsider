@@ -2,7 +2,6 @@ import 'package:basketballinsider/models/sites.dart';
 import 'package:http/http.dart' as http;
 import 'users.dart';
 
-
 class Services{
   static Future<List<User>> getUsers() async{
     try{
@@ -29,7 +28,6 @@ class SiteServices{
       final response = await http.get(url1);
       if(response.statusCode == 200){
       //  final List<User> users= usersFromJson(response.body);
-
         final List<Site> sites= siteFromJson(response.body);
         return sites;
       }else{
@@ -41,4 +39,3 @@ class SiteServices{
     }
   }
 }
-

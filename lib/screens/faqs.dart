@@ -32,7 +32,7 @@ class _FaqsState extends State<Faqs> {
             "successful sports bettor. You will, however, have to put in a lot of effort. Although the "
             "internet has made it much easier for us to bet on our favorite sports, making money remains difficult. "
             "Unfortunately, there are no shortcuts to success."),
-    MyItem(header: "Can I place bets online using my phone or tablet?",
+    MyItem(header: "4. Does a Ke Token payment go directly to the bank account?",
         body: "Sure! Because mobile betting is so popular these days, most sites cater to those who want to bet "
             "using their smartphone or tablet. They devote a significant amount of time to ensuring that their "
             "websites are compatible with all mobile devices. Some websites have even created their own apps, "

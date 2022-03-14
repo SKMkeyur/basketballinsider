@@ -98,7 +98,7 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
         body: "We think Bavada is the best betting app in "
             "2021. The platform offers competitive odds on a huge range of sports and makes it easy to set up parlays. "
             "Plus, Bavada offers a 750 welcome bonus when you make a deposite using Bitcoin"),
-  ];
+        ];
 
   @override
   Widget build(BuildContext context) {

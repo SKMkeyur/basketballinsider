@@ -3,21 +3,29 @@ import 'package:basketballinsider/screens/aboutus.dart';
 import 'package:basketballinsider/screens/betdescription.dart';
 import 'package:basketballinsider/screens/comparison.dart';
 import 'package:basketballinsider/screens/faqs.dart';
+import 'package:basketballinsider/screens/feedback.dart';
 import 'package:basketballinsider/screens/getstarted00.dart';
 import 'package:basketballinsider/screens/getstarted02.dart';
 import 'package:basketballinsider/screens/home.dart';
 import 'package:basketballinsider/screens/home01.dart';
+import 'package:basketballinsider/screens/home02.dart';
 import 'package:basketballinsider/screens/jsontolistview.dart';
 import 'package:basketballinsider/screens/jsontolistviewsite.dart';
+import 'package:basketballinsider/screens/livestreaminginformation.dart';
 import 'package:basketballinsider/screens/menu.dart';
 import 'package:basketballinsider/screens/review.dart';
+import 'package:basketballinsider/screens/splashscreen.dart';
 import 'package:basketballinsider/widgets/card.dart';
 import 'package:flutter/material.dart';
 import 'package:basketballinsider/screens/getstarted01.dart';
 import 'package:basketballinsider/screens/getstarted03.dart';
 import 'package:basketballinsider/screens/getstarted04.dart';
+import 'package:flutter/services.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp(const MyApp());
 }
 
@@ -27,14 +35,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Home02(),
+     // home: SplashScreen(),
+      home: SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
-
-
-
 
 
 //
